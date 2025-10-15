@@ -6,8 +6,8 @@
 <title>Side Scroller Game</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:#87CEEB;overflow:hidden;font-family:sans-serif;}
-  canvas{display:block;margin:0 auto;background:#87CEEB;}
+  body{overflow:hidden;font-family:sans-serif;background:#000;}
+  canvas{display:block;margin:0 auto;}
   #hud{
     position:absolute;top:10px;left:10px;color:#fff;font-size:18px;
     background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;
@@ -18,48 +18,61 @@
 <canvas id="gameCanvas" width="800" height="500"></canvas>
 <div id="hud">Score: 0 | Health: 3</div>
 <script>
+// === CANVAS SETUP ===
 const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
 const width=canvas.width;
 const height=canvas.height;
 
-// Player
+// === LOAD IMAGES ===
+const images = {
+  player: new Image(),
+  enemy: new Image(),
+  background: new Image()
+};
+images.player.src = 'assets/player/Player.PNG';
+images.enemy.src = 'assets/enemy/Enemy.PNG';
+images.background.src = 'assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png';
+
+// === GAME STATE ===
+let gameState='start';
+let score=0;
+let worldOffsetX=0;
+
+// === PLAYER ===
 const player={
-  x:100,y:height-80,width:50,height:50,speed:5,bullets:[],health:3
+  x:100,y:height-100,width:50,height:50,speed:5,bullets:[],health:3,lastShot:0
 };
 
-// Enemy
+// === ENEMY ===
 class Enemy{
   constructor(xStart,xEnd){
-    this.zoneStart=xStart;
-    this.zoneEnd=xEnd;
-    this.width=50;this.height=50;
+    this.zoneStart=xStart; this.zoneEnd=xEnd;
+    this.width=50; this.height=50;
     this.x=xStart + Math.random()*(xEnd-xStart-this.width);
-    this.y=height-80;
-    this.speed=2;this.direction=1;
-    this.bullets=[];this.shootCooldown=Math.floor(Math.random()*100)+50;
+    this.y=height-100;
+    this.speed=2; this.direction=1;
+    this.bullets=[]; this.shootCooldown=Math.floor(Math.random()*100)+50;
   }
   move(){
     this.x+=this.speed*this.direction;
-    if(this.x<this.zoneStart||this.x+this.width>this.zoneEnd) this.direction*=-1;
+    if(this.x<this.zoneStart || this.x+this.width>this.zoneEnd) this.direction*=-1;
     this.shootCooldown--;
     if(this.shootCooldown<=0){
       this.bullets.push({x:this.x,y:this.y+this.height/2,width:8,height:8,speed:-5});
-      this.shootCooldown= Math.floor(Math.random()*150)+50;
+      this.shootCooldown=Math.floor(Math.random()*150)+50;
     }
     this.bullets.forEach((b,i)=>{
       b.x+=b.speed;
       if(b.x<0) this.bullets.splice(i,1);
       if(b.x<player.x+player.width && b.x+b.width>player.x && b.y<player.y+player.height && b.y+b.height>player.y){
-        player.health--;
-        this.bullets.splice(i,1);
+        player.health--; this.bullets.splice(i,1);
         if(player.health<=0) gameState='gameover';
       }
     });
   }
   draw(offsetX){
-    ctx.fillStyle='red';
-    ctx.fillRect(this.x-offsetX,this.y,this.width,this.height);
+    ctx.drawImage(images.enemy,this.x-offsetX,this.y,this.width,this.height);
     this.bullets.forEach(b=>{
       ctx.fillStyle='orange';
       ctx.fillRect(b.x-offsetX,b.y,b.width,b.height);
@@ -67,7 +80,7 @@ class Enemy{
   }
 }
 
-// Enemies
+// === ENEMIES ===
 let enemyZones=[
   {xStart:500,xEnd:800,spawned:false},
   {xStart:1200,xEnd:1600,spawned:false},
@@ -75,24 +88,6 @@ let enemyZones=[
 ];
 let enemies=[];
 
-// Bullets
-class Bullet{
-  constructor(x,y,speed){this.x=x;this.y=y;this.width=8;this.height=8;this.speed=speed;}
-  update(){this.x+=this.speed;}
-  draw(){ctx.fillStyle='yellow';ctx.fillRect(this.x,this.y,this.width,this.height);}
-}
-
-// Controls
-const keys={};
-window.addEventListener('keydown',e=>keys[e.key]=true);
-window.addEventListener('keyup',e=>keys[e.key]=false);
-
-// Game state
-let gameState='start';
-let score=0;
-let worldOffsetX=0;
-
-// Functions
 function initEnemies(){enemies=[];enemyZones.forEach(z=>z.spawned=false);spawnEnemies();}
 function spawnEnemies(){
   enemyZones.forEach(zone=>{
@@ -104,6 +99,16 @@ function spawnEnemies(){
   });
 }
 
+// === BULLETS ===
+class Bullet{constructor(x,y,speed){this.x=x;this.y=y;this.width=8;this.height=8;this.speed=speed;}
+update(){this.x+=this.speed;} draw(){ctx.fillStyle='yellow';ctx.fillRect(this.x,this.y,this.width,this.height);}}
+
+// === CONTROLS ===
+const keys={};
+window.addEventListener('keydown',e=>keys[e.key]=true);
+window.addEventListener('keyup',e=>keys[e.key]=false);
+
+// === UPDATE FUNCTION ===
 function update(){
   if(gameState!=='playing') return;
 
@@ -115,11 +120,9 @@ function update(){
   if(keys['ArrowRight'] && player.x>=width/2) worldOffsetX+=player.speed;
 
   // Shooting
-  if(keys[' ']){
-    if(!player.lastShot||Date.now()-player.lastShot>300){
-      player.bullets.push(new Bullet(player.x+player.width,player.y+player.height/2,8));
-      player.lastShot=Date.now();
-    }
+  if(keys[' '] && Date.now()-player.lastShot>300){
+    player.bullets.push(new Bullet(player.x+player.width,player.y+player.height/2,8));
+    player.lastShot=Date.now();
   }
 
   // Update bullets
@@ -138,38 +141,31 @@ function update(){
   // Update enemies
   enemies.forEach(e=>e.move());
 
-  // Spawn new enemies
+  // Spawn new enemies dynamically
   spawnEnemies();
 
-  // Update HUD
+  // HUD
   document.getElementById('hud').innerText=`Score: ${score} | Health: ${player.health}`;
 }
 
+// === DRAW FUNCTION ===
 function draw(){
   ctx.clearRect(0,0,width,height);
 
-  // Background
-  ctx.fillStyle='#87CEEB';
-  ctx.fillRect(0,0,width,height);
-  ctx.fillStyle='#228B22';
-  ctx.fillRect(0,height-30,width,height);
+  // Draw background
+  ctx.drawImage(images.background,-worldOffsetX,0,width,height);
+  ctx.drawImage(images.background,-worldOffsetX+width,0,width,height);
 
   if(gameState==='start'){
     ctx.fillStyle='black';
     ctx.font='40px sans-serif';
     ctx.textAlign='center';
     ctx.fillText('Press ENTER to Start',width/2,height/2);
-  }
-  else if(gameState==='playing'){
-    // Player
-    ctx.fillStyle='blue';
-    ctx.fillRect(player.x,player.y,player.width,player.height);
-    // Bullets
+  } else if(gameState==='playing'){
+    ctx.drawImage(images.player,player.x,player.y,player.width,player.height);
     player.bullets.forEach(b=>b.draw());
-    // Enemies
     enemies.forEach(e=>e.draw(worldOffsetX));
-  }
-  else if(gameState==='gameover'){
+  } else if(gameState==='gameover'){
     ctx.fillStyle='black';
     ctx.font='50px sans-serif';
     ctx.textAlign='center';
@@ -181,13 +177,15 @@ function draw(){
   }
 }
 
+// === GAME LOOP ===
 function gameLoop(){update();draw();requestAnimationFrame(gameLoop);}
 
+// === START / RESTART ===
 window.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     if(gameState==='start'||gameState==='gameover'){
       gameState='playing';
-      player.x=100;player.y=height-80;player.health=3;player.bullets=[];score=0;worldOffsetX=0;
+      player.x=100;player.y=height-100;player.health=3;player.bullets=[];score=0;worldOffsetX=0;
       initEnemies();
     }
   }
