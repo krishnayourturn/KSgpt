@@ -3,122 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contra-Style Shooter Game</title>
+<title>Contra-Style Game</title>
 <link rel="stylesheet" href="style.css">
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png">
-<!-- Meta Description -->
-<meta name="description" content="Play the ultimate Contra-style side-scrolling shooter game with your favorite images. Run, jump, and shoot enemies.">
-<meta name="keywords" content="Contra, Shooter, HTML5, Game, Side-scroller, JavaScript">
-<meta name="author" content="Krishna Sharma">
-
-<!-- ======= GAME INSTRUCTIONS ======= -->
-<!--
-Controls:
-- Move Left: A or ArrowLeft
-- Move Right: D or ArrowRight
-- Jump: W or ArrowUp
-- Shoot: Spacebar
-- Pause: P
-- Start: Start Button
-Features:
-- Player movement with jump physics
-- Multiple enemy types with AI patrol and shooting
-- Dynamic side-scrolling world
-- Score, Health, Level system
-- Start Screen, Pause Screen, Game Over screen
-- Uses Player.PNG, Enemy.PNG, background image
--->
-
 </head>
 <body>
 
-<!-- ================= START SCREEN ================= -->
-<div id="startScreen" aria-label="Start Screen">
-  <h1>CONTRA-STYLE SHOOTER</h1>
-  <p id="instructions">Use A/D or Arrow keys to move. W/ArrowUp to jump. Space to shoot.</p>
-  <button id="startButton" aria-label="Start Game Button">START GAME</button>
-  <button id="instructionsButton" aria-label="Instructions Button">SHOW INSTRUCTIONS</button>
-  <div id="extraInfo">
-    <p>Enemies spawn dynamically as you progress.</p>
-    <p>Collect points by defeating enemies.</p>
-    <p>Game difficulty increases with each level.</p>
-  </div>
+<div id="startScreen">
+  <h1>CONTRA-STYLE GAME</h1>
+  <button id="startButton">START GAME</button>
 </div>
 
-<!-- ================= PAUSE SCREEN ================= -->
-<div id="pauseScreen" aria-label="Pause Screen" style="display:none;">
-  <h1>GAME PAUSED</h1>
-  <button id="resumeButton" aria-label="Resume Game Button">RESUME</button>
-  <button id="restartButton" aria-label="Restart Game Button">RESTART</button>
-</div>
+<canvas id="gameCanvas" width="900" height="500"></canvas>
 
-<!-- ================= GAME CANVAS ================= -->
-<canvas id="gameCanvas" width="900" height="500" aria-label="Game Canvas"></canvas>
-
-<!-- ================= HUD ================= -->
-<div id="hud" aria-label="Heads Up Display">
-  <span id="scoreDisplay">Score: 0</span> | 
-  <span id="healthDisplay">Health: 3</span> | 
-  <span id="levelDisplay">Level: 1</span>
-</div>
-
-<!-- ================= FOOTER ================= -->
-<footer id="gameFooter" aria-label="Game Footer">
-  <p>Contra-style Game by Krishna Sharma</p>
-  <p>Images used: Player.PNG, Enemy.PNG, 38B6D2B8-11A7-481F-8DAA-246E6F467D16.png</p>
-  <p>Controls: A/D/W + Arrow keys + Spacebar + P for Pause</p>
-</footer>
-
-<!-- ================= MODALS ================= -->
-<div id="gameOverModal" aria-label="Game Over Screen" style="display:none;">
-  <h1>GAME OVER</h1>
-  <p id="finalScore">Score: 0</p>
-  <button id="restartGameOverButton">RESTART</button>
-</div>
-
-<div id="levelUpModal" aria-label="Level Up Screen" style="display:none;">
-  <h1>LEVEL UP!</h1>
-  <p>Get ready for the next challenge.</p>
-  <button id="continueLevelButton">CONTINUE</button>
-</div>
-
-<!-- ================= ACCESSIBILITY ================= -->
-<audio id="bgMusic" src="assets/sounds/background.mp3" loop></audio>
-<audio id="shootSound" src="assets/sounds/shoot.wav"></audio>
-<audio id="enemyHitSound" src="assets/sounds/enemy_hit.wav"></audio>
-
-<!-- ================= SCRIPTS ================= -->
 <script src="script.js"></script>
-
-<!-- ================= COMMENTS ================= -->
-<!--
-This HTML file is intentionally verbose (~500 lines) to provide a full-featured game setup.
-It includes:
-- Start screen with multiple buttons and instructions
-- Pause screen overlay
-- Game canvas
-- HUD with score, health, level
-- Footer with credits
-- Game over and level up modals
-- Accessibility labels for screen readers
-- Audio elements for background music and effects
-- Meta tags for SEO and description
-- Comments explaining every section
--->
-
-<!-- Filler content to reach 500+ lines -->
-<!-- Additional blank divs for structure -->
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-<div></div><div></div><div></div><div></div><div></div>
-
 </body>
 </html>
