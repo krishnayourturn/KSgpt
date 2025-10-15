@@ -16,9 +16,6 @@ playerImg.src = 'assets/player/Player.PNG'; // transparent player
 const enemyImg = new Image();
 enemyImg.src = 'assets/enemy/Enemy.PNG';
 
-const bgImg = new Image();
-bgImg.src = 'assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png';
-
 /* ================= AUDIO ELEMENTS =================== */
 const bgMusic = document.getElementById('bgMusic');
 const shootSound = document.getElementById('shootSound');
@@ -27,7 +24,7 @@ const enemyHitSound = document.getElementById('enemyHitSound');
 /* ================= PLAYER SETUP ===================== */
 const player = {
     x: 100,
-    y: 400,
+    y: HEIGHT - 70,
     width: 50,
     height: 50,
     speed: 5,
@@ -46,7 +43,7 @@ class Enemy {
         this.xStart = xStart;
         this.xEnd = xEnd;
         this.x = xStart + Math.random() * (xEnd - xStart - 50);
-        this.y = 400;
+        this.y = HEIGHT - 70;
         this.width = 50;
         this.height = 50;
         this.bullets = [];
@@ -56,12 +53,12 @@ class Enemy {
     }
 
     update() {
-        // patrol movement
+        // Patrol movement
         this.x += this.speed * this.direction;
         if (this.x < this.xStart) this.direction = 1;
         if (this.x + this.width > this.xEnd) this.direction = -1;
 
-        // detection radius
+        // Detection radius for player
         if (Math.abs(player.x - this.x) < 250) {
             if (this.cooldown <= 0) {
                 this.bullets.push({
@@ -71,21 +68,21 @@ class Enemy {
                     height: 8,
                     speed: player.x < this.x ? -5 : 5
                 });
-                this.cooldown = 80;
+                this.cooldown = 80; // cooldown frames
             }
         }
         this.cooldown--;
 
-        // update enemy bullets
+        // Update bullets
         this.bullets.forEach((b, i) => {
             b.x += b.speed;
-            // collision with player
+            // Collision with player
             if (b.x < player.x + player.width && b.x + b.width > player.x &&
                 b.y < player.y + player.height && b.y + b.height > player.y) {
                 player.health--;
                 this.bullets.splice(i, 1);
             }
-            // remove bullet offscreen
+            // Remove bullet if offscreen
             if (b.x < worldOffsetX || b.x > worldOffsetX + WIDTH) this.bullets.splice(i, 1);
         });
     }
@@ -108,7 +105,7 @@ let enemyZones = [
     {xStart: 3000, xEnd: 3400, spawned: false}
 ];
 
-/* ================= WORLD ============================ */
+/* ================= WORLD & HUD ===================== */
 let worldOffsetX = 0;
 let score = 0;
 let level = 1;
@@ -159,14 +156,14 @@ function spawnEnemies() {
 
 /* ================= UPDATE FUNCTION ================== */
 function update() {
-    // player movement
+    // Player movement
     if (keys['ArrowLeft']) player.x -= player.speed;
     if (keys['ArrowRight']) player.x += player.speed;
 
-    // world scrolling
+    // World scrolling
     if (player.x >= WIDTH / 2) worldOffsetX += player.speed;
 
-    // gravity & jump
+    // Gravity & jump
     player.dy += player.gravity;
     player.y += player.dy;
     if (player.y + player.height >= HEIGHT - 20) {
@@ -180,14 +177,14 @@ function update() {
         player.onGround = false;
     }
 
-    // shooting
+    // Shooting
     if (keys[' '] && Date.now() - player.lastShot > 300) {
         player.bullets.push(new Bullet(player.x + player.width, player.y + player.height / 2, 8));
         player.lastShot = Date.now();
         shootSound.play();
     }
 
-    // update bullets
+    // Update bullets
     player.bullets.forEach((b, i) => {
         b.update();
         if (b.x > worldOffsetX + WIDTH) player.bullets.splice(i, 1);
@@ -202,13 +199,13 @@ function update() {
         });
     });
 
-    // update enemies
+    // Update enemies
     enemies.forEach(e => e.update());
 
-    // spawn new enemies
+    // Spawn new enemies
     spawnEnemies();
 
-    // game over check
+    // Game over check
     if (player.health <= 0) {
         alert('Game Over! Final Score: ' + score);
         location.reload();
@@ -219,20 +216,20 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    // draw background
-    ctx.drawImage(bgImg, -worldOffsetX, 0, WIDTH, HEIGHT);
-    ctx.drawImage(bgImg, -worldOffsetX + WIDTH, 0, WIDTH, HEIGHT);
+    // Black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    // draw player
+    // Draw player
     ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-    // draw bullets
+    // Draw bullets
     player.bullets.forEach(b => b.draw(worldOffsetX));
 
-    // draw enemies
+    // Draw enemies
     enemies.forEach(e => e.draw(worldOffsetX));
 
-    // update HUD
+    // Update HUD
     document.getElementById('scoreDisplay').innerText = `Score: ${score}`;
     document.getElementById('healthDisplay').innerText = `Health: ${player.health}`;
     document.getElementById('levelDisplay').innerText = `Level: ${level}`;
@@ -247,6 +244,6 @@ function gameLoop() {
 
 /* ================= START GAME ======================= */
 window.onload = () => {
-    bgMusic.play().catch(()=>{console.log('Autoplay blocked, click Select button to start music.')});
+    bgMusic.play().catch(()=>{console.log('Autoplay blocked, press Select to start music.')});
     gameLoop();
 };
