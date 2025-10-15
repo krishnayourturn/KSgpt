@@ -1,5 +1,5 @@
 /* ===================================================== */
-/*           CONTRA-STYLE FULL GAME SCRIPT              */
+/*                 CHATGPT CONTRA JS                    */
 /* ===================================================== */
 
 /* ================= CANVAS SETUP ===================== */
@@ -11,7 +11,7 @@ const HEIGHT = canvas.height;
 
 /* ================= LOAD IMAGES ===================== */
 const playerImg = new Image();
-playerImg.src = 'assets/player/Player.PNG'; // transparent player
+playerImg.src = 'assets/player/Player.PNG'; // Transparent player
 
 const enemyImg = new Image();
 enemyImg.src = 'assets/enemy/Enemy.PNG';
@@ -48,7 +48,7 @@ class Enemy {
         this.height = 50;
         this.bullets = [];
         this.cooldown = 0;
-        this.direction = Math.random() < 0.5 ? -1 : 1; // patrol direction
+        this.direction = Math.random() < 0.5 ? -1 : 1; // Patrol direction
         this.speed = 1.5;
     }
 
@@ -58,7 +58,7 @@ class Enemy {
         if (this.x < this.xStart) this.direction = 1;
         if (this.x + this.width > this.xEnd) this.direction = -1;
 
-        // Detection radius for player
+        // Player detection radius
         if (Math.abs(player.x - this.x) < 250) {
             if (this.cooldown <= 0) {
                 this.bullets.push({
@@ -68,22 +68,24 @@ class Enemy {
                     height: 8,
                     speed: player.x < this.x ? -5 : 5
                 });
-                this.cooldown = 80; // cooldown frames
+                this.cooldown = 80; // frames between shots
             }
         }
         this.cooldown--;
 
-        // Update bullets
+        // Update enemy bullets
         this.bullets.forEach((b, i) => {
             b.x += b.speed;
             // Collision with player
-            if (b.x < player.x + player.width && b.x + b.width > player.x &&
-                b.y < player.y + player.height && b.y + b.height > player.y) {
+            if (b.x < player.x + player.width &&
+                b.x + b.width > player.x &&
+                b.y < player.y + player.height &&
+                b.y + b.height > player.y) {
                 player.health--;
                 this.bullets.splice(i, 1);
             }
-            // Remove bullet if offscreen
-            if (b.x < worldOffsetX || b.x > worldOffsetX + WIDTH) this.bullets.splice(i, 1);
+            // Remove offscreen bullets
+            if (b.x < 0 || b.x > worldOffsetX + WIDTH) this.bullets.splice(i, 1);
         });
     }
 
@@ -96,7 +98,7 @@ class Enemy {
     }
 }
 
-/* ================= ENEMY ZONES ====================== */
+/* ================= ENEMY SPAWN ZONES ================= */
 let enemies = [];
 let enemyZones = [
     {xStart: 600, xEnd: 900, spawned: false},
@@ -110,12 +112,12 @@ let worldOffsetX = 0;
 let score = 0;
 let level = 1;
 
-/* ================= CONTROLS ========================= */
+/* ================= KEYBOARD CONTROLS ================= */
 const keys = {};
 window.addEventListener('keydown', e => keys[e.key] = true);
 window.addEventListener('keyup', e => keys[e.key] = false);
 
-/* ================= MOBILE BUTTON SUPPORT ============ */
+/* ================= ON-SCREEN BUTTONS ================= */
 document.getElementById('leftBtn').addEventListener('touchstart', ()=>keys['ArrowLeft']=true);
 document.getElementById('leftBtn').addEventListener('touchend', ()=>keys['ArrowLeft']=false);
 document.getElementById('rightBtn').addEventListener('touchstart', ()=>keys['ArrowRight']=true);
@@ -125,7 +127,7 @@ document.getElementById('jumpBtn').addEventListener('touchend', ()=>keys['ArrowU
 document.getElementById('fireBtn').addEventListener('touchstart', ()=>keys[' ']=true);
 document.getElementById('fireBtn').addEventListener('touchend', ()=>keys[' ']=false);
 
-/* ================= PLAYER BULLET CLASS ================= */
+/* ================= BULLET CLASS ===================== */
 class Bullet {
     constructor(x, y, speed) {
         this.x = x;
@@ -156,11 +158,11 @@ function spawnEnemies() {
 
 /* ================= UPDATE FUNCTION ================== */
 function update() {
-    // Player movement
+    // Player left/right movement
     if (keys['ArrowLeft']) player.x -= player.speed;
     if (keys['ArrowRight']) player.x += player.speed;
 
-    // World scrolling
+    // World scrolling when player passes half screen
     if (player.x >= WIDTH / 2) worldOffsetX += player.speed;
 
     // Gravity & jump
@@ -172,6 +174,7 @@ function update() {
         player.onGround = true;
     }
 
+    // Jump
     if ((keys['ArrowUp'] || keys['w']) && player.onGround) {
         player.dy = -player.jumpForce;
         player.onGround = false;
@@ -187,10 +190,14 @@ function update() {
     // Update bullets
     player.bullets.forEach((b, i) => {
         b.update();
+        // Remove offscreen bullets
         if (b.x > worldOffsetX + WIDTH) player.bullets.splice(i, 1);
+        // Check collision with enemies
         enemies.forEach((e, ei) => {
-            if (b.x < e.x + e.width && b.x + b.width > e.x &&
-                b.y < e.y + e.height && b.y + b.height > e.y) {
+            if (b.x < e.x + e.width &&
+                b.x + b.width > e.x &&
+                b.y < e.y + e.height &&
+                b.y + b.height > e.y) {
                 enemies.splice(ei, 1);
                 player.bullets.splice(i, 1);
                 score += 10;
@@ -202,7 +209,7 @@ function update() {
     // Update enemies
     enemies.forEach(e => e.update());
 
-    // Spawn new enemies
+    // Spawn new enemies dynamically
     spawnEnemies();
 
     // Game over check
@@ -223,7 +230,7 @@ function draw() {
     // Draw player
     ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-    // Draw bullets
+    // Draw player bullets
     player.bullets.forEach(b => b.draw(worldOffsetX));
 
     // Draw enemies
