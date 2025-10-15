@@ -3,67 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contra-Style Full Game</title>
+<title>ChatGPT Contra</title>
 <link rel="stylesheet" href="style.css">
-
-<!-- Game Meta & Description -->
-<meta name="description" content="Contra-style side-scrolling shooter game with mobile buttons, dynamic enemies, and scrolling background.">
+<meta name="description" content="Play ChatGPT Contra, a fully playable Contra-style side-scroller with on-screen controls inside the game canvas.">
 <meta name="author" content="Krishna Sharma">
 </head>
 <body>
 
 <!-- ================= HUD ================= -->
-<div id="hud" aria-label="Game Heads Up Display">
-  <span id="scoreDisplay">Score: 0</span> | 
-  <span id="healthDisplay">Health: 3</span> | 
+<div id="hud" aria-label="Game HUD">
+  <span id="scoreDisplay">Score: 0</span>
+  <span id="healthDisplay">Health: 3</span>
   <span id="levelDisplay">Level: 1</span>
 </div>
 
 <!-- ================= GAME CANVAS ================= -->
 <canvas id="gameCanvas" width="900" height="500" aria-label="Game Canvas"></canvas>
 
-<!-- ================= ON-SCREEN BUTTONS ================= -->
-<div id="controls">
-
-  <!-- LEFT CONTROLS -->
-  <div id="leftControls">
-    <button id="leftBtn" class="controlBtn" aria-label="Move Left">◀</button>
-    <button id="rightBtn" class="controlBtn" aria-label="Move Right">▶</button>
-  </div>
-
-  <!-- CENTER SELECT BUTTON -->
-  <div id="centerControls">
-    <button id="selectBtn" class="controlBtn" aria-label="Select / Start">SELECT</button>
-  </div>
-
-  <!-- RIGHT CONTROLS -->
-  <div id="rightControls">
-    <button id="jumpBtn" class="controlBtn" aria-label="Jump">▲</button>
-    <button id="fireBtn" class="controlBtn" aria-label="Fire">●</button>
-  </div>
+<!-- ================= ON-CANVAS BUTTONS ================= -->
+<div id="onScreenButtons">
+  <button id="leftBtn" class="controlBtn" aria-label="Move Left">◀</button>
+  <button id="rightBtn" class="controlBtn" aria-label="Move Right">▶</button>
+  <button id="jumpBtn" class="controlBtn" aria-label="Jump">▲</button>
+  <button id="fireBtn" class="controlBtn" aria-label="Fire">●</button>
+  <button id="selectBtn" class="controlBtn" aria-label="Select / Start">SELECT</button>
 </div>
 
-<!-- ================= FOOTER ================= -->
-<footer id="gameFooter" aria-label="Game Footer">
-  <p>Contra-style game by Krishna Sharma</p>
-  <p>Use on-screen buttons or keyboard to play.</p>
-</footer>
-
-<!-- ================= AUDIO ELEMENTS ================= -->
+<!-- ================= AUDIO ================= -->
 <audio id="bgMusic" src="assets/sounds/background.mp3" loop></audio>
 <audio id="shootSound" src="assets/sounds/shoot.wav"></audio>
 <audio id="enemyHitSound" src="assets/sounds/enemy_hit.wav"></audio>
 
-<!-- ================= SCRIPTS ================= -->
+<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
 
 <!-- ================= COMMENTS ================= -->
 <!-- 
-This HTML starts immediately on a black background. 
-No first screen image is used. 
-Canvas shows gameplay directly. 
-Transparent player PNG is supported. 
-Fully compatible with style.css and script.js.
+ChatGPT Contra
+- Black background gameplay
+- HUD shows score, health, level
+- Buttons are on-screen (inside game canvas area)
+- Fully mobile- and desktop-ready
+- Transparent player PNG works cleanly
+- Connects with style.css and script.js
 -->
 
 </body>
