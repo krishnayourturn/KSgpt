@@ -6,17 +6,34 @@
 <title>Side Scroller Game</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{overflow:hidden;font-family:sans-serif;background:#000;}
-  canvas{display:block;margin:0 auto;}
+  body{overflow:hidden;font-family:sans-serif;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;}
+  canvas{display:block;background:#000;}
   #hud{
     position:absolute;top:10px;left:10px;color:#fff;font-size:18px;
     background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;
   }
+  #startScreen{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    display:flex;justify-content:center;align-items:center;
+    flex-direction:column;
+    background: url('assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png') no-repeat center/cover;
+    z-index:10;
+  }
+  #startButton{
+    padding:15px 30px;font-size:24px;border:none;border-radius:10px;
+    background: #00ffff;color:#000;font-weight:bold;cursor:pointer;
+    margin-top:20px;
+  }
+  #startButton:hover{background:#00cccc;}
 </style>
 </head>
 <body>
+<div id="startScreen">
+  <button id="startButton">START GAME</button>
+</div>
 <canvas id="gameCanvas" width="800" height="500"></canvas>
 <div id="hud">Score: 0 | Health: 3</div>
+
 <script>
 // === CANVAS SETUP ===
 const canvas=document.getElementById('gameCanvas');
@@ -112,20 +129,18 @@ window.addEventListener('keyup',e=>keys[e.key]=false);
 function update(){
   if(gameState!=='playing') return;
 
-  // Player movement
   if(keys['ArrowLeft'] && player.x>50) player.x-=player.speed;
   if(keys['ArrowRight'] && player.x<width/2) player.x+=player.speed;
+  if(keys['ArrowUp'] && player.y>0) player.y-=player.speed;
+  if(keys['ArrowDown'] && player.y+player.height<height) player.y+=player.speed;
 
-  // Scroll world
-  if(keys['ArrowRight'] && player.x>=width/2) worldOffsetX+=player.speed;
-
-  // Shooting
   if(keys[' '] && Date.now()-player.lastShot>300){
     player.bullets.push(new Bullet(player.x+player.width,player.y+player.height/2,8));
     player.lastShot=Date.now();
   }
 
-  // Update bullets
+  if(keys['ArrowRight'] && player.x>=width/2) worldOffsetX+=player.speed;
+
   player.bullets.forEach((b,i)=>{
     b.update();
     if(b.x>worldOffsetX+width) player.bullets.splice(i,1);
@@ -138,13 +153,8 @@ function update(){
     });
   });
 
-  // Update enemies
   enemies.forEach(e=>e.move());
-
-  // Spawn new enemies dynamically
   spawnEnemies();
-
-  // HUD
   document.getElementById('hud').innerText=`Score: ${score} | Health: ${player.health}`;
 }
 
@@ -152,20 +162,15 @@ function update(){
 function draw(){
   ctx.clearRect(0,0,width,height);
 
-  // Draw background
   ctx.drawImage(images.background,-worldOffsetX,0,width,height);
   ctx.drawImage(images.background,-worldOffsetX+width,0,width,height);
 
-  if(gameState==='start'){
-    ctx.fillStyle='black';
-    ctx.font='40px sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('Press ENTER to Start',width/2,height/2);
-  } else if(gameState==='playing'){
+  if(gameState==='playing'){
     ctx.drawImage(images.player,player.x,player.y,player.width,player.height);
     player.bullets.forEach(b=>b.draw());
     enemies.forEach(e=>e.draw(worldOffsetX));
-  } else if(gameState==='gameover'){
+  }
+  else if(gameState==='gameover'){
     ctx.fillStyle='black';
     ctx.font='50px sans-serif';
     ctx.textAlign='center';
@@ -173,25 +178,21 @@ function draw(){
     ctx.fillStyle='white';
     ctx.font='30px sans-serif';
     ctx.fillText(`Score: ${score}`,width/2,height/2+10);
-    ctx.fillText('Press ENTER to Restart',width/2,height/2+50);
+    ctx.fillText('Press START to Restart',width/2,height/2+50);
   }
 }
 
 // === GAME LOOP ===
 function gameLoop(){update();draw();requestAnimationFrame(gameLoop);}
-
-// === START / RESTART ===
-window.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    if(gameState==='start'||gameState==='gameover'){
-      gameState='playing';
-      player.x=100;player.y=height-100;player.health=3;player.bullets=[];score=0;worldOffsetX=0;
-      initEnemies();
-    }
-  }
-});
-
 gameLoop();
+
+// === START BUTTON ===
+document.getElementById('startButton').addEventListener('click',()=>{
+  gameState='playing';
+  document.getElementById('startScreen').style.display='none';
+  player.x=100;player.y=height-100;player.health=3;player.bullets=[];score=0;worldOffsetX=0;
+  initEnemies();
+});
 </script>
 </body>
 </html>
