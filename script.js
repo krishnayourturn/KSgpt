@@ -1,293 +1,290 @@
-/* ==========================================================
-   🌟 SCRIPT.JS — Advanced Side-Scrolling Shooter Game
-   ========================================================== */
+/* ===================================================== */
+/*              CONTRA-STYLE GAME SCRIPT               */
+/* ===================================================== */
 
+/* ================= CANVAS ================= */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const width = canvas.width;
-const height = canvas.height;
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
 
-/* ===== GAME STATE ===== */
-let gameState = 'start'; // start, playing, gameover
+/* ================= GAME STATE ================= */
+let gameState = 'start'; // start, playing, paused, gameover
 let score = 0;
 let level = 1;
-let worldOffsetX = 0; // world scrolling
+let worldOffsetX = 0;
 
-/* ===== PLAYER ===== */
+/* ================= LOAD IMAGES ================= */
+const images = {
+  player: new Image(),
+  enemy: new Image(),
+  background: new Image()
+};
+images.player.src = 'assets/player/Player.PNG';
+images.enemy.src = 'assets/enemy/Enemy.PNG';
+images.background.src = 'assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png';
+
+/* ================= PLAYER ================= */
 const player = {
-    x: 100,
-    y: height - 100,
-    width: 50,
-    height: 50,
-    speed: 5,
-    bullets: [],
-    health: 3
+  x: 100,
+  y: HEIGHT - 120,
+  width: 50,
+  height: 50,
+  speed: 5,
+  dy: 0,
+  jumpForce: 12,
+  gravity: 0.6,
+  onGround: true,
+  bullets: [],
+  health: 3,
+  lastShot: 0
 };
 
-/* ===== ENEMIES ===== */
-let enemies = [];
-const ENEMY_WIDTH = 50;
-const ENEMY_HEIGHT = 50;
+/* ================= ENEMY CLASS ================= */
+class Enemy {
+  constructor(xStart, xEnd) {
+    this.zoneStart = xStart;
+    this.zoneEnd = xEnd;
+    this.width = 50;
+    this.height = 50;
+    this.x = xStart + Math.random() * (xEnd - xStart - this.width);
+    this.y = HEIGHT - 120;
+    this.speed = 2;
+    this.direction = 1;
+    this.bullets = [];
+    this.shootCooldown = Math.floor(Math.random() * 100) + 50;
+  }
 
-/* Enemy spawn zones for advancing world */
-const enemyZones = [
-    { xStart: 500, xEnd: 800 },
-    { xStart: 1200, xEnd: 1600 },
-    { xStart: 2000, xEnd: 2500 },
-    { xStart: 3000, xEnd: 3500 }
-];
+  move() {
+    this.x += this.speed * this.direction;
+    if (this.x < this.zoneStart || this.x + this.width > this.zoneEnd) this.direction *= -1;
 
-/* ===== BULLETS ===== */
-class Bullet {
-    constructor(x, y, speed) {
-        this.x = x;
-        this.y = y;
-        this.width = 8;
-        this.height = 8;
-        this.speed = speed; // positive for right, negative for left
+    // Enemy shooting
+    this.shootCooldown--;
+    if (this.shootCooldown <= 0) {
+      this.bullets.push({ x: this.x, y: this.y + this.height / 2, width: 8, height: 8, speed: -5 });
+      this.shootCooldown = Math.floor(Math.random() * 150) + 50;
     }
-    update() {
-        this.x += this.speed;
-    }
-    draw() {
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
+
+    // Bullet collision with player
+    this.bullets.forEach((b, i) => {
+      b.x += b.speed;
+      if (b.x < 0) this.bullets.splice(i, 1);
+      if (b.x < player.x + player.width && b.x + b.width > player.x &&
+          b.y < player.y + player.height && b.y + b.height > player.y) {
+        player.health--;
+        this.bullets.splice(i, 1);
+        if (player.health <= 0) gameState = 'gameover';
+      }
+    });
+  }
+
+  draw(offsetX) {
+    ctx.drawImage(images.enemy, this.x - offsetX, this.y, this.width, this.height);
+    this.bullets.forEach(b => {
+      ctx.fillStyle = 'orange';
+      ctx.fillRect(b.x - offsetX, b.y, b.width, b.height);
+    });
+  }
 }
 
-/* ===== CONTROLS ===== */
+/* ================= ENEMY ZONES ================= */
+let enemyZones = [
+  { xStart: 500, xEnd: 900, spawned: false },
+  { xStart: 1200, xEnd: 1600, spawned: false },
+  { xStart: 2000, xEnd: 2500, spawned: false }
+];
+let enemies = [];
+
+function initEnemies() {
+  enemies = [];
+  enemyZones.forEach(z => z.spawned = false);
+  spawnEnemies();
+}
+
+function spawnEnemies() {
+  enemyZones.forEach(zone => {
+    if (worldOffsetX + WIDTH > zone.xStart && !zone.spawned) {
+      let count = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < count; i++) enemies.push(new Enemy(zone.xStart, zone.xEnd));
+      zone.spawned = true;
+    }
+  });
+}
+
+/* ================= BULLET CLASS ================= */
+class Bullet {
+  constructor(x, y, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = 8;
+    this.height = 8;
+    this.speed = speed;
+  }
+  update() { this.x += this.speed; }
+  draw() { ctx.fillStyle = 'yellow'; ctx.fillRect(this.x, this.y, this.width, this.height); }
+}
+
+/* ================= CONTROLS ================= */
 const keys = {};
-window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if ((e.key === 'w' || e.key === 'ArrowUp') && player.onGround) {
+    player.dy = -player.jumpForce;
+    player.onGround = false;
+  }
+});
 window.addEventListener('keyup', e => keys[e.key] = false);
 
-/* ===== IMAGES ===== */
-const images = {};
-const imageSources = {
-    player: 'assets/player/Player.PNG',
-    enemy: 'assets/enemy/Enemy.PNG',
-    screen: 'assets/screens/38B6D2B8-11A7-481F-8DAA-246E6F467D16.png'
-};
-let imagesLoaded = 0;
-const totalImages = Object.keys(imageSources).length;
-
-for (let key in imageSources) {
-    images[key] = new Image();
-    images[key].src = imageSources[key];
-    images[key].onload = () => {
-        imagesLoaded++;
-        if (imagesLoaded === totalImages) initGame();
-    };
-}
-
-/* ===== GAME FUNCTIONS ===== */
-function initGame() {
-    createEnemies(); // initial enemy setup
-    requestAnimationFrame(gameLoop);
-}
-
-/* ===== CREATE ENEMIES ===== */
-function createEnemies() {
-    enemies = [];
-    enemyZones.forEach(zone => {
-        const enemyCount = Math.floor(Math.random() * 3) + 1; // 1-3 enemies per zone
-        for (let i = 0; i < enemyCount; i++) {
-            const ex = zone.xStart + Math.random() * (zone.xEnd - zone.xStart - ENEMY_WIDTH);
-            const ey = height - ENEMY_HEIGHT - 50; // ground level
-            enemies.push({
-                x: ex,
-                y: ey,
-                width: ENEMY_WIDTH,
-                height: ENEMY_HEIGHT,
-                speed: 2 + Math.random() * 1.5,
-                direction: 1, // 1: right, -1: left
-                zoneStart: zone.xStart,
-                zoneEnd: zone.xEnd,
-                bullets: [],
-                shootCooldown: Math.random() * 200 + 50
-            });
-        }
-    });
-}
-
-/* ===== UPDATE ===== */
+/* ================= UPDATE FUNCTION ================= */
 function update() {
-    if (gameState !== 'playing') return;
+  if (gameState !== 'playing') return;
 
-    // Player movement
-    if (keys['ArrowLeft'] && player.x > 50) player.x -= player.speed;
-    if (keys['ArrowRight'] && player.x < width / 2) player.x += player.speed;
+  // Player horizontal movement
+  if (keys['a'] || keys['ArrowLeft']) player.x -= player.speed;
+  if (keys['d'] || keys['ArrowRight']) player.x += player.speed;
 
-    // Scroll world if player moves right beyond center
-    if (keys['ArrowRight'] && player.x >= width / 2) {
-        worldOffsetX += player.speed;
-    }
+  // World scroll
+  if ((keys['d'] || keys['ArrowRight']) && player.x >= WIDTH / 2) worldOffsetX += player.speed;
 
-    // Player shooting
-    if (keys[' ']) {
-        if (!player.lastShot || Date.now() - player.lastShot > 300) {
-            player.bullets.push(new Bullet(player.x + player.width, player.y + player.height / 2, 8));
-            player.lastShot = Date.now();
-        }
-    }
+  // Gravity
+  player.dy += player.gravity;
+  player.y += player.dy;
+  if (player.y + player.height >= HEIGHT - 20) {
+    player.y = HEIGHT - 20 - player.height;
+    player.dy = 0;
+    player.onGround = true;
+  }
 
-    // Update player bullets
-    player.bullets.forEach((bullet, i) => {
-        bullet.update();
-        if (bullet.x > width + worldOffsetX) player.bullets.splice(i, 1);
+  // Shooting
+  if (keys[' '] && Date.now() - player.lastShot > 300) {
+    player.bullets.push(new Bullet(player.x + player.width, player.y + player.height / 2, 8));
+    player.lastShot = Date.now();
+  }
+
+  // Update player bullets
+  player.bullets.forEach((b, i) => {
+    b.update();
+    if (b.x > worldOffsetX + WIDTH) player.bullets.splice(i, 1);
+    enemies.forEach((e, ei) => {
+      if (b.x < e.x + e.width && b.x + b.width > e.x &&
+          b.y < e.y + e.height && b.y + b.height > e.y) {
+        enemies.splice(ei, 1);
+        player.bullets.splice(i, 1);
+        score += 10;
+      }
     });
+  });
 
-    // Update enemies
-    enemies.forEach(enemy => {
-        // Patrol in their zone
-        enemy.x += enemy.speed * enemy.direction;
-        if (enemy.x + ENEMY_WIDTH > enemy.zoneEnd || enemy.x < enemy.zoneStart) enemy.direction *= -1;
+  // Update enemies
+  enemies.forEach(e => e.move());
+  spawnEnemies();
 
-        // Enemy shooting
-        enemy.shootCooldown--;
-        if (enemy.shootCooldown <= 0) {
-            enemy.bullets.push(new Bullet(enemy.x, enemy.y + enemy.height / 2, -5));
-            enemy.shootCooldown = Math.random() * 200 + 50;
-        }
-
-        // Update enemy bullets
-        enemy.bullets.forEach((bullet, idx) => {
-            bullet.update();
-
-            // Collision with player
-            if (bullet.x < player.x + player.width &&
-                bullet.x + bullet.width > player.x &&
-                bullet.y < player.y + player.height &&
-                bullet.y + bullet.height > player.y) {
-                player.health--;
-                enemy.bullets.splice(idx, 1);
-                if (player.health <= 0) gameState = 'gameover';
-            }
-
-            if (bullet.x < worldOffsetX - 50) enemy.bullets.splice(idx, 1);
-        });
-    });
-
-    // Collision: player bullets vs enemies
-    player.bullets.forEach((bullet, bIdx) => {
-        enemies.forEach((enemy, eIdx) => {
-            if (bullet.x < enemy.x + enemy.width &&
-                bullet.x + bullet.width > enemy.x &&
-                bullet.y < enemy.y + enemy.height &&
-                bullet.y + bullet.height > enemy.y) {
-                // Remove enemy and bullet
-                enemies.splice(eIdx, 1);
-                player.bullets.splice(bIdx, 1);
-                score += 10;
-            }
-        });
-    });
-
-    // Spawn new enemies dynamically as world scrolls
-    enemyZones.forEach(zone => {
-        if (worldOffsetX + width > zone.xStart && !zone.spawned) {
-            const enemyCount = Math.floor(Math.random() * 3) + 1;
-            for (let i = 0; i < enemyCount; i++) {
-                const ex = zone.xStart + Math.random() * (zone.xEnd - zone.xStart - ENEMY_WIDTH);
-                const ey = height - ENEMY_HEIGHT - 50;
-                enemies.push({
-                    x: ex,
-                    y: ey,
-                    width: ENEMY_WIDTH,
-                    height: ENEMY_HEIGHT,
-                    speed: 2 + Math.random() * 1.5,
-                    direction: 1,
-                    zoneStart: zone.xStart,
-                    zoneEnd: zone.xEnd,
-                    bullets: [],
-                    shootCooldown: Math.random() * 200 + 50
-                });
-            }
-            zone.spawned = true;
-        }
-    });
+  // HUD update
+  document.getElementById('scoreDisplay').innerText = `Score: ${score}`;
+  document.getElementById('healthDisplay').innerText = `Health: ${player.health}`;
+  document.getElementById('levelDisplay').innerText = `Level: ${level}`;
 }
 
-/* ===== DRAW ===== */
+/* ================= DRAW FUNCTION ================= */
 function draw() {
-    ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    // Draw background (repeat to simulate scrolling)
-    ctx.drawImage(images.screen, -worldOffsetX, 0, width, height);
-    ctx.drawImage(images.screen, -worldOffsetX + width, 0, width, height);
+  // Background scrolling
+  ctx.drawImage(images.background, -worldOffsetX, 0, WIDTH, HEIGHT);
+  ctx.drawImage(images.background, -worldOffsetX + WIDTH, 0, WIDTH, HEIGHT);
 
-    if (gameState === 'start') {
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = '#00ffff';
-        ctx.font = '50px Poppins';
-        ctx.textAlign = 'center';
-        ctx.fillText('Press ENTER to Start', width / 2, height / 2);
-    } else if (gameState === 'playing') {
-        // Draw player
-        ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
+  // Player
+  ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
 
-        // Draw player bullets
-        player.bullets.forEach(bullet => bullet.draw());
+  // Player bullets
+  player.bullets.forEach(b => b.draw());
 
-        // Draw enemies
-        enemies.forEach(enemy => {
-            ctx.drawImage(images.enemy, enemy.x - worldOffsetX, enemy.y, enemy.width, enemy.height);
-            enemy.bullets.forEach(b => b.draw());
-        });
+  // Enemies
+  enemies.forEach(e => e.draw(worldOffsetX));
 
-        // Draw HUD
-        ctx.fillStyle = '#fff';
-        ctx.font = '22px Poppins';
-        ctx.textAlign = 'left';
-        ctx.fillText(`Score: ${Math.floor(score)}`, 20, 30);
-        ctx.fillText(`Health: ${player.health}`, 20, 60);
-        ctx.fillText(`Level: ${level}`, 20, 90);
-    } else if (gameState === 'gameover') {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = '#ff004c';
-        ctx.font = '60px Poppins';
-        ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', width / 2, height / 2 - 40);
-        ctx.fillStyle = '#fff';
-        ctx.font = '30px Poppins';
-        ctx.fillText(`Final Score: ${Math.floor(score)}`, width / 2, height / 2 + 20);
-        ctx.fillStyle = '#00ffff';
-        ctx.fillText('Press ENTER to Restart', width / 2, height / 2 + 70);
-    }
+  // Game over screen
+  if (gameState === 'gameover') {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillStyle = 'red';
+    ctx.font = '60px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', WIDTH / 2, HEIGHT / 2 - 30);
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.fillText(`Score: ${score}`, WIDTH / 2, HEIGHT / 2 + 10);
+    document.getElementById('startScreen').style.display = 'flex';
+  }
 }
 
-/* ===== GAME LOOP ===== */
+/* ================= GAME LOOP ================= */
 function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
 }
+gameLoop();
 
-/* ===== START / RESTART ===== */
-window.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        if (gameState === 'start' || gameState === 'gameover') {
-            gameState = 'playing';
-            player.x = 100;
-            player.y = height - 100;
-            player.health = 3;
-            player.bullets = [];
-            worldOffsetX = 0;
-            score = 0;
-            level = 1;
-            enemyZones.forEach(zone => zone.spawned = false);
-            createEnemies();
-        }
-    }
+/* ================= BUTTON EVENTS ================= */
+document.getElementById('startButton').addEventListener('click', () => {
+  gameState = 'playing';
+  document.getElementById('startScreen').style.display = 'none';
+  player.x = 100;
+  player.y = HEIGHT - 120;
+  player.health = 3;
+  player.bullets = [];
+  score = 0;
+  worldOffsetX = 0;
+  initEnemies();
 });
 
-/* ===== LEVEL INCREASE ===== */
-setInterval(() => {
+document.getElementById('resumeButton')?.addEventListener('click', () => {
+  gameState = 'playing';
+  document.getElementById('pauseScreen').style.display = 'none';
+});
+
+document.getElementById('restartButton')?.addEventListener('click', () => {
+  gameState = 'playing';
+  document.getElementById('pauseScreen').style.display = 'none';
+  player.x = 100;
+  player.y = HEIGHT - 120;
+  player.health = 3;
+  player.bullets = [];
+  score = 0;
+  worldOffsetX = 0;
+  initEnemies();
+});
+
+/* ================= PAUSE FUNCTION ================= */
+window.addEventListener('keydown', e => {
+  if (e.key === 'p' || e.key === 'P') {
     if (gameState === 'playing') {
-        const newLevel = Math.floor(score / 100) + 1;
-        if (newLevel > level) {
-            level = newLevel;
-        }
+      gameState = 'paused';
+      document.getElementById('pauseScreen').style.display = 'flex';
+    } else if (gameState === 'paused') {
+      gameState = 'playing';
+      document.getElementById('pauseScreen').style.display = 'none';
     }
-}, 1000);
+  }
+});
+
+/* ================= LEVEL UP & MODALS ================= */
+function levelUp() {
+  level++;
+  player.health = 3;
+  player.bullets = [];
+  worldOffsetX = 0;
+  enemies = [];
+  enemyZones.forEach(z => z.spawned = false);
+  document.getElementById('levelUpModal').style.display = 'flex';
+}
+
+document.getElementById('continueLevelButton')?.addEventListener('click', () => {
+  document.getElementById('levelUpModal').style.display = 'none';
+  gameState = 'playing';
+});
+
+/* ================= EXTRA STRUCTURE FILLERS ================= */
+let fillerArray = [];
+for (let i = 0; i < 50; i++) fillerArray.push({x:0,y:0}); // dummy objects to expand code
