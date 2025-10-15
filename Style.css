@@ -1,1 +1,182 @@
+/* ==========================================================
+   🌟 GAME STYLE SHEET — Created for Krishna Sharma
+   ========================================================== */
 
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  user-select: none;
+}
+
+/* ===== GAME CANVAS ===== */
+canvas {
+  display: block;
+  margin: 50px auto;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  background: radial-gradient(circle at top, #222 0%, #111 100%);
+  box-shadow: 
+    0 0 40px rgba(0, 255, 255, 0.15),
+    inset 0 0 25px rgba(0, 255, 255, 0.1);
+  transition: all 0.4s ease;
+}
+
+/* Canvas glow on hover */
+canvas:hover {
+  transform: scale(1.02);
+  box-shadow:
+    0 0 60px rgba(0, 255, 200, 0.3),
+    inset 0 0 25px rgba(0, 255, 255, 0.15);
+}
+
+/* ===== GAME HEADER ===== */
+#gameTitle {
+  text-align: center;
+  color: #00f7ff;
+  font-size: 3rem;
+  letter-spacing: 4px;
+  text-shadow: 0 0 15px #00ffff, 0 0 30px #009fff;
+  margin-top: 30px;
+  animation: glowTitle 3s infinite alternate;
+}
+
+@keyframes glowTitle {
+  from { text-shadow: 0 0 10px #00ffff, 0 0 30px #0066ff; }
+  to { text-shadow: 0 0 20px #00f7ff, 0 0 50px #00ffff; }
+}
+
+/* ===== BUTTONS ===== */
+button {
+  display: inline-block;
+  background: linear-gradient(135deg, #0077ff, #00ffee);
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  margin: 15px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+button:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ===== START SCREEN ===== */
+#startScreen, #gameOverScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top, rgba(0,0,0,0.95), rgba(0,0,0,1));
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.6s ease;
+  z-index: 10;
+}
+
+#startScreen.active, #gameOverScreen.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ===== GAME OVER SCREEN ===== */
+#gameOverScreen h1 {
+  font-size: 3rem;
+  color: #ff004c;
+  text-shadow: 0 0 20px #ff004c, 0 0 40px #ff1a66;
+  margin-bottom: 20px;
+}
+
+/* ===== SCORE & INFO BAR ===== */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #fff;
+  font-size: 1.2rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 18px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+/* ===== RESPONSIVENESS ===== */
+@media (max-width: 900px) {
+  canvas {
+    width: 90%;
+    height: auto;
+  }
+
+  #gameTitle {
+    font-size: 2rem;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 12px 24px;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ===== SPECIAL EFFECTS ===== */
+.glow {
+  color: #00eaff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00eaff, 0 0 30px #00ccff;
+}
+
+.flash {
+  animation: pulse 1s infinite;
+}
+
+.fade-in {
+  animation: fadeIn 1s ease forwards;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
