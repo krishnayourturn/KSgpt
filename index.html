@@ -6,31 +6,14 @@
 <title>Contra-Style Full Game</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- Meta & Description -->
-<meta name="description" content="Full Contra-style game with scrolling background, dynamic enemies, player movement, shooting, and on-screen mobile buttons.">
+<!-- Game Meta & Description -->
+<meta name="description" content="Contra-style side-scrolling shooter game with mobile buttons, dynamic enemies, and scrolling background.">
 <meta name="author" content="Krishna Sharma">
-
-<!-- Instructions in comments -->
-<!-- 
-Controls:
-- Left / Right: Move buttons
-- Jump: Jump button
-- Fire: Fire button
-- Select / Start: Center button
-Game Features:
-- Side-scrolling
-- Player with transparent PNG
-- Enemies spawn in zones and detect player
-- Score and health tracking
-- HUD
-- Mobile-friendly
--->
-
 </head>
 <body>
 
 <!-- ================= HUD ================= -->
-<div id="hud" aria-label="Heads Up Display">
+<div id="hud" aria-label="Game Heads Up Display">
   <span id="scoreDisplay">Score: 0</span> | 
   <span id="healthDisplay">Health: 3</span> | 
   <span id="levelDisplay">Level: 1</span>
@@ -42,21 +25,21 @@ Game Features:
 <!-- ================= ON-SCREEN BUTTONS ================= -->
 <div id="controls">
 
-  <!-- Left buttons -->
+  <!-- LEFT CONTROLS -->
   <div id="leftControls">
-    <button id="leftBtn" class="controlBtn" aria-label="Move Left Button">◀</button>
-    <button id="rightBtn" class="controlBtn" aria-label="Move Right Button">▶</button>
+    <button id="leftBtn" class="controlBtn" aria-label="Move Left">◀</button>
+    <button id="rightBtn" class="controlBtn" aria-label="Move Right">▶</button>
   </div>
 
-  <!-- Center select button -->
+  <!-- CENTER SELECT BUTTON -->
   <div id="centerControls">
-    <button id="selectBtn" class="controlBtn" aria-label="Select Button">SELECT</button>
+    <button id="selectBtn" class="controlBtn" aria-label="Select / Start">SELECT</button>
   </div>
 
-  <!-- Right buttons: Jump & Fire -->
+  <!-- RIGHT CONTROLS -->
   <div id="rightControls">
-    <button id="jumpBtn" class="controlBtn" aria-label="Jump Button">▲</button>
-    <button id="fireBtn" class="controlBtn" aria-label="Fire Button">●</button>
+    <button id="jumpBtn" class="controlBtn" aria-label="Jump">▲</button>
+    <button id="fireBtn" class="controlBtn" aria-label="Fire">●</button>
   </div>
 </div>
 
@@ -76,34 +59,12 @@ Game Features:
 
 <!-- ================= COMMENTS ================= -->
 <!-- 
-This HTML file is fully structured for a complete Contra-style game:
-1. Canvas for gameplay
-2. HUD for Score, Health, Level
-3. Mobile-friendly controls (left, right, jump, fire, select)
-4. Footer with credits
-5. Audio placeholders
-6. Accessibility features (aria-labels)
-7. Expanded structure with filler divs for large file size
+This HTML starts immediately on a black background. 
+No first screen image is used. 
+Canvas shows gameplay directly. 
+Transparent player PNG is supported. 
+Fully compatible with style.css and script.js.
 -->
-
-<!-- ================= FILLERS / STRUCTURE ================= -->
-<div class="filler1"></div><div class="filler2"></div><div class="filler3"></div>
-<div class="filler4"></div><div class="filler5"></div><div class="filler6"></div>
-<div class="filler7"></div><div class="filler8"></div><div class="filler9"></div>
-<div class="filler10"></div><div class="filler11"></div><div class="filler12"></div>
-<div class="filler13"></div><div class="filler14"></div><div class="filler15"></div>
-<div class="filler16"></div><div class="filler17"></div><div class="filler18"></div>
-<div class="filler19"></div><div class="filler20"></div><div class="filler21"></div>
-<div class="filler22"></div><div class="filler23"></div><div class="filler24"></div>
-<div class="filler25"></div><div class="filler26"></div><div class="filler27"></div>
-<div class="filler28"></div><div class="filler29"></div><div class="filler30"></div>
-<div class="filler31"></div><div class="filler32"></div><div class="filler33"></div>
-<div class="filler34"></div><div class="filler35"></div><div class="filler36"></div>
-<div class="filler37"></div><div class="filler38"></div><div class="filler39"></div>
-<div class="filler40"></div><div class="filler41"></div><div class="filler42"></div>
-<div class="filler43"></div><div class="filler44"></div><div class="filler45"></div>
-<div class="filler46"></div><div class="filler47"></div><div class="filler48"></div>
-<div class="filler49"></div><div class="filler50"></div>
 
 </body>
 </html>
